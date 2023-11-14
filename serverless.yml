@@ -1,0 +1,82 @@
+service: api-go-messenger
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: provided.al2023
+  architecture: arm64
+  region: ${env:AWS_REGION}
+  stage: ${env:STAGE}
+  versionFunctions: false
+  httpApi:
+    cors: true
+    name: ${self:service}-${self:provider.stage}-api
+  environment:
+    ENV_PREFIX: ${self:service}-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:*
+            - s3:*
+            - dynamodb:*
+            - ssm:*
+            - sqs:*
+          Resource: "*"
+
+package:
+  individually: true
+
+custom:
+  version: "v1"
+  prefix: ${self:service}-${self:provider.stage}
+
+functions:
+  createSchedule:
+    handler: bootstrap
+    package:
+      patterns: bin/createSchedule.zip
+    environment:
+      ENV_SCHEDULER_ROLE_ARN: !GetAtt SchedulerRole.Arn
+      ENV_SCHEDULE_GROUP_NAME: !Ref MessengerScheduleGroup
+
+resources:
+  Resources:
+    SchedulerRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Description: "${self:custom.prefix} scheduler role to invoke Lambda functions"
+        RoleName: ${self:custom.prefix}-schedulerrole
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: scheduler.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: DefaultPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource: "*"
+        Tags:
+          - Key: Prefix
+            Value: ${self:custom.prefix}
+          - Key: Version
+            Value: ${self:custom.version}
+
+    MessengerScheduleGroup:
+      Type: AWS::Scheduler::ScheduleGroup
+      Properties:
+        Name: ${self:custom.prefix}-scheduler
+        Tags:
+          - Key: Prefix
+            Value: ${self:custom.prefix}
+          - Key: Version
+            Value: ${self:custom.version}
