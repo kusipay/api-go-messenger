@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/mefellows/vesper"
@@ -22,7 +23,7 @@ func Handler(ctx context.Context) (string, error) {
 		fmt.Println("something |", string(bts))
 	}
 
-	return "Hello, World!", nil
+	return "Hello, World!", errors.New("Pemrimto")
 }
 
 func main() {
