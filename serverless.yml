@@ -4,7 +4,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: provided.al2023
+  runtime: provided.al2
   architecture: arm64
   region: ${env:AWS_REGION}
   stage: ${env:STAGE}
