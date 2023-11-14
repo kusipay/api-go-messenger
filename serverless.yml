@@ -4,7 +4,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: provided.al2
+  runtime: provided.al2023
   architecture: arm64
   region: ${env:AWS_REGION}
   stage: ${env:STAGE}
@@ -37,7 +37,7 @@ functions:
   createSchedule:
     handler: bootstrap
     package:
-      patterns: bin/createSchedule.zip
+      artifact: bin/createSchedule.zip
     environment:
       ENV_SCHEDULER_ROLE_ARN: !GetAtt SchedulerRole.Arn
       ENV_SCHEDULE_GROUP_NAME: !Ref MessengerScheduleGroup
