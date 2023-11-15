@@ -1,4 +1,4 @@
-package input
+package createschedule
 
 import (
 	"context"
@@ -7,12 +7,23 @@ import (
 	"github.com/kusipay/api-go-messenger/adapter/output"
 	"github.com/kusipay/api-go-messenger/domain/types"
 	"github.com/kusipay/api-go-messenger/domain/usecase"
+	"github.com/kusipay/api-go-messenger/util"
 )
 
-func CreateScheduleHandler(ctx context.Context, event types.CreateScheduleInput) (string, error) {
+func fail(err error) (util.AnyResponse, error) {
+	return util.AnyResponse{}, err
+}
+
+func success() (util.AnyResponse, error) {
+	return util.AnyResponse{
+		"message": "success",
+	}, nil
+}
+
+func Handler(ctx context.Context, event types.CreateScheduleEvent) (util.AnyResponse, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
-		return "", err
+		return fail(err)
 	}
 
 	logger := output.NewLoggerRepository()
@@ -20,8 +31,8 @@ func CreateScheduleHandler(ctx context.Context, event types.CreateScheduleInput)
 
 	err = usecase.CreateScheduleUseCase(logger, scheduler).CreateSchedule(event)
 	if err != nil {
-		return "", err
+		return fail(err)
 	}
 
-	return "Hello, World!", nil
+	return success()
 }

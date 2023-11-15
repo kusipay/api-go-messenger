@@ -11,5 +11,9 @@ type LoggerRepository interface {
 }
 
 type SchedulerRepository interface {
-	CreateSchedule(input types.CreateScheduleInput) error
+	CreateSchedule(params types.CreateScheduleParams) error
+}
+
+type WhatsappRepository interface {
+	SendWhatsapp(params types.SendWhatsappParams) error
 }

@@ -3,6 +3,7 @@ package output
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -26,23 +27,39 @@ func NewSchedulerRepository(ctx context.Context, cfg aws.Config, logger port.Log
 	return &scdlr{ctx: ctx, logger: logger, client: client}
 }
 
-func (s *scdlr) CreateSchedule(input t.CreateScheduleInput) error {
+func (s *scdlr) CreateSchedule(params t.CreateScheduleParams) error {
 	functionArn := os.Getenv("ENV_FUNCTION_ARN")
+	if functionArn == "" {
+		return errors.New("ENV_FUNCTION_ARN not found")
+	}
 	roleArn := os.Getenv("ENV_SCHEDULER_ROLE_ARN")
+	if roleArn == "" {
+		return errors.New("ENV_SCHEDULER_ROLE_ARN not found")
+	}
 	groupName := os.Getenv("ENV_SCHEDULE_GROUP_NAME")
+	if groupName == "" {
+		return errors.New("ENV_SCHEDULE_GROUP_NAME not found")
+	}
 
-	bts, err := json.Marshal(input.Payload)
+	bts, err := json.Marshal(params.Payload)
 	if err != nil {
 		return err
 	}
 
-	startAt := time.Unix(input.StartAt, 0)
-	endAt := time.Unix(input.EndAt, 0)
+	startAt := time.Unix(params.StartAt, 0)
+	endAt := time.Unix(params.EndAt, 0)
+
+	cronExpression, err := getCronExpression(startAt, params.FrecuencyType)
+	if err != nil {
+		s.logger.Error("CreateSchedule |", err.Error())
+
+		return err
+	}
 
 	_, err = s.client.CreateSchedule(s.ctx, &scheduler.CreateScheduleInput{
-		Name:               aws.String(input.Id),
-		Description:        aws.String(fmt.Sprintf("%s schedule for %s", input.FrecuencyType, input.Id)),
-		ScheduleExpression: aws.String(getCronExpression(startAt, input.FrecuencyType)),
+		Name:               aws.String(params.Id),
+		Description:        aws.String(fmt.Sprintf("%s schedule for %s", params.FrecuencyType, params.Id)),
+		ScheduleExpression: aws.String(cronExpression),
 		FlexibleTimeWindow: &types.FlexibleTimeWindow{
 			Mode:                   types.FlexibleTimeWindowModeFlexible,
 			MaximumWindowInMinutes: aws.Int32(60),
@@ -68,15 +85,18 @@ func (s *scdlr) CreateSchedule(input t.CreateScheduleInput) error {
 	return nil
 }
 
-func getCronExpression(startAt time.Time, frecuency string) string {
+func getCronExpression(startAt time.Time, frecuency t.FrecuencyType) (string, error) {
 	minutes := startAt.UTC().Minute()
 	hours := startAt.UTC().Hour()
 	dayOfTheWeek := int(startAt.UTC().Weekday())
 	dayOfTheMonth := startAt.UTC().Day()
 
-	if frecuency == "monthly" {
-		return fmt.Sprintf("cron(%d %d %d * ? *)", minutes, hours, dayOfTheMonth)
+	switch frecuency {
+	case t.FrecuencyTypeMonthly:
+		return fmt.Sprintf("cron(%d %d %d * ? *)", minutes, hours, dayOfTheMonth), nil
+	case t.FrecuencyTypeWeekly:
+		return fmt.Sprintf("cron(%d %d ? * %d *)", minutes, hours, dayOfTheWeek), nil
+	default:
+		return "", fmt.Errorf("frecuencyType not supported: %s", frecuency)
 	}
-
-	return fmt.Sprintf("cron(%d %d ? * %d *)", minutes, hours, dayOfTheWeek)
 }
