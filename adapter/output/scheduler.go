@@ -71,7 +71,7 @@ func (s *scdlr) CreateSchedule(input t.CreateScheduleInput) error {
 func getCronExpression(startAt time.Time, frecuency string) string {
 	minutes := startAt.UTC().Minute()
 	hours := startAt.UTC().Hour()
-	dayOfTheWeek := startAt.UTC().Weekday()
+	dayOfTheWeek := int(startAt.UTC().Weekday())
 	dayOfTheMonth := startAt.UTC().Day()
 
 	if frecuency == "monthly" {
