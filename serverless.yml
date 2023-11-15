@@ -24,6 +24,7 @@ provider:
             - dynamodb:*
             - ssm:*
             - sqs:*
+            - scheduler:*
           Resource: "*"
 
 package:
