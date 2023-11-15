@@ -34,6 +34,10 @@ custom:
   prefix: ${self:service}-${self:provider.stage}
 
 functions:
+  sendWhatsapp:
+    handler: bootstrap
+    package:
+      artifact: bin/sendWhatsapp.zip
   createSchedule:
     handler: bootstrap
     package:
@@ -41,6 +45,7 @@ functions:
     environment:
       ENV_SCHEDULER_ROLE_ARN: !GetAtt SchedulerRole.Arn
       ENV_SCHEDULE_GROUP_NAME: !Ref MessengerScheduleGroup
+      ENV_FUNCTION_ARN: !GetAtt SendWhatsappLambdaFunction.Arn
 
 resources:
   Resources:

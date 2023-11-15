@@ -3,19 +3,13 @@ package output
 import (
 	"fmt"
 	"strings"
-)
 
-type Logger interface {
-	Verbose(tag string, message ...string)
-	Debug(tag string, message ...string)
-	Info(tag string, message ...string)
-	Warn(tag string, message ...string)
-	Error(tag string, message ...string)
-}
+	"github.com/kusipay/api-go-messenger/domain/port"
+)
 
 type logger struct{}
 
-func NewLogger() Logger {
+func NewLoggerRepository() port.LoggerRepository {
 	return &logger{}
 }
 

@@ -56,8 +56,8 @@ func logError(err error) {
 	}
 }
 
-func log(vars ...string) {
-	results := []any{}
+func log(tag string, vars ...string) {
+	results := []any{tag, "\r"}
 
 	for _, s := range vars {
 		results = append(results, strings.ReplaceAll(s, "\n", "\r"))
