@@ -12,8 +12,6 @@ provider:
   httpApi:
     cors: true
     name: ${self:service}-${self:provider.stage}-api
-  environment:
-    ENV_PREFIX: ${self:service}-${self:provider.stage}
   iam:
     role:
       statements:
