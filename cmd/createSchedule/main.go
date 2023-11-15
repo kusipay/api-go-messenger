@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"runtime"
 
 	"github.com/kusipay/api-go-messenger/adapter/output"
 	"github.com/kusipay/api-go-messenger/middleware"
@@ -11,7 +12,7 @@ import (
 func Handler(ctx context.Context) (string, error) {
 	logger := output.NewLogger()
 
-	logger.Info("Handler |", "Hello, World!")
+	logger.Verbose("Handler |", "Hello, World!", runtime.Version())
 
 	return "Hello, World!", nil
 }
