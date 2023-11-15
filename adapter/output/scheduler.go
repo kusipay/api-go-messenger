@@ -75,7 +75,7 @@ func getCronExpression(startAt time.Time, frecuency string) string {
 	dayOfTheMonth := startAt.UTC().Day()
 
 	if frecuency == "monthly" {
-		return fmt.Sprintf("cron(%d %d %d ? * *)", minutes, hours, dayOfTheMonth)
+		return fmt.Sprintf("cron(%d %d %d * ? *)", minutes, hours, dayOfTheMonth)
 	}
 
 	return fmt.Sprintf("cron(%d %d ? * %d *)", minutes, hours, dayOfTheWeek)
