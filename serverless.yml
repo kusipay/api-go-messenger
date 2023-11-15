@@ -25,6 +25,7 @@ provider:
             - ssm:*
             - sqs:*
             - scheduler:*
+            - iam:*
           Resource: "*"
 
 package:
