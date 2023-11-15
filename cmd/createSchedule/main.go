@@ -2,32 +2,22 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 
+	"github.com/kusipay/api-go-messenger/adapter/output"
+	"github.com/kusipay/api-go-messenger/middleware"
 	"github.com/mefellows/vesper"
 )
 
 func Handler(ctx context.Context) (string, error) {
-	fmt.Println("Hello", "world")
+	logger := output.NewLogger()
 
-	something := map[string]string{
-		"hello": "world",
-		"foo":   "bar",
-		"baz":   "qux",
-	}
+	logger.Info("Handler |", "Hello, World!")
 
-	bts, err := json.MarshalIndent(something, "", "  ")
-	if err == nil {
-		fmt.Println("something |", string(bts))
-	}
-
-	return "Hello, World!", errors.New("Pemrimto")
+	return "Hello, World!", nil
 }
 
 func main() {
-	v := vesper.New(Handler)
+	v := vesper.New(Handler).Use(middleware.EventLog())
 
 	v.Start()
 }

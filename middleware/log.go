@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kusipay/api-go-messenger/pkg/util"
 	"github.com/mefellows/vesper"
 )
 
@@ -35,7 +34,7 @@ func logEnvironments() {
 
 	envs := strings.Join(environments, "\r")
 
-	util.Log("Environment |", envs)
+	log("Environment |", envs)
 }
 
 func logAny(tag string, event any) {
@@ -48,11 +47,21 @@ func logAny(tag string, event any) {
 		text = string(bytes)
 	}
 
-	util.Log(tag+" |", text)
+	log(tag+" |", text)
 }
 
 func logError(err error) {
 	if err != nil {
-		util.Log("Error |", err.Error())
+		log("Error |", err.Error())
 	}
+}
+
+func log(vars ...string) {
+	results := []any{}
+
+	for _, s := range vars {
+		results = append(results, strings.ReplaceAll(s, "\n", "\r"))
+	}
+
+	fmt.Println(results...)
 }
