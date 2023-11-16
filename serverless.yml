@@ -85,3 +85,10 @@ resources:
             Value: ${self:custom.prefix}
           - Key: Version
             Value: ${self:custom.version}
+
+  Outputs:
+    CreateScheduleFunctionName:
+      Description: "Create Schedule Function Name"
+      Value: !Ref CreateScheduleLambdaFunction
+      Export:
+        Name: ${self:custom.prefix}-createschedulefunctionname
