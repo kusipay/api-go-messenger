@@ -26,7 +26,7 @@ func (w *wtsapp) SendWhatsapp(params types.SendWhatsappParams) error {
 
 	url := "https://graph.facebook.com/v18.0/128041223734612/messages"
 
-	components := buildWhatsappBodyComponents(params.Variables)
+	parameters := buildBodyParameters(params.Variables)
 
 	rawBody := map[string]any{
 		"messaging_product": "whatsapp",
@@ -37,7 +37,12 @@ func (w *wtsapp) SendWhatsapp(params types.SendWhatsappParams) error {
 			"language": map[string]any{
 				"code": params.LanguageCode,
 			},
-			"components": components,
+			"components": []map[string]any{
+				{
+					"type":       "body",
+					"parameters": parameters,
+				},
+			},
 		},
 	}
 
@@ -45,6 +50,8 @@ func (w *wtsapp) SendWhatsapp(params types.SendWhatsappParams) error {
 	if err != nil {
 		return err
 	}
+
+	w.logger.Debug("SendWhatsapp |", string(body))
 
 	r, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
@@ -75,19 +82,15 @@ func (w *wtsapp) SendWhatsapp(params types.SendWhatsappParams) error {
 	return errors.New("status code is not 200" + response.Status)
 }
 
-func buildWhatsappBodyComponents(variables []string) []map[string]any {
-	var result []map[string]any
-
+func buildBodyParameters(variables []string) (parameters []map[string]string) {
 	for _, variable := range variables {
-		obj := map[string]any{
-			"type": "body",
-			"parameters": []any{
-				map[string]any{"type": "text", "text": variable},
-			},
+		param := map[string]string{
+			"type": "text",
+			"text": variable,
 		}
 
-		result = append(result, obj)
+		parameters = append(parameters, param)
 	}
 
-	return result
+	return
 }
